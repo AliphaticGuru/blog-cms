@@ -1,0 +1,50 @@
+name: Laravel CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: laravel
+          POSTGRES_PASSWORD: secret
+          POSTGRES_DB: blog_cms
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd="pg_isready -U laravel -d blog_cms"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: pdo_pgsql, mbstring, bcmath
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress --no-suggest
+
+      - name: Copy env file
+        run: cp .env.example .env
+
+      - name: Generate app key
+        run: php artisan key:generate
+
+      - name: Run migrations
+        run: php artisan migrate
+
+      - name: Run tests
+        run: php artisan test
