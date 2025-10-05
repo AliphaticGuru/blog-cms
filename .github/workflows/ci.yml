@@ -35,16 +35,21 @@ jobs:
           extensions: pdo_pgsql, mbstring, bcmath
 
       - name: Install dependencies
-        run: composer install --prefer-dist --no-progress --no-suggest
+        working-directory: src
+        run: composer install --prefer-dist --no-progress
 
       - name: Copy env file
+        working-directory: src
         run: cp .env.example .env
 
       - name: Generate app key
+        working-directory: src
         run: php artisan key:generate
 
       - name: Run migrations
+        working-directory: src
         run: php artisan migrate
 
       - name: Run tests
+        working-directory: src
         run: php artisan test
