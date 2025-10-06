@@ -50,6 +50,10 @@ jobs:
         working-directory: src
         run: php artisan migrate
 
-      - name: Run tests (ignore failures)
+      - name: Run tests (if failures occur, check the database service logs for details)
         working-directory: src
-        run: php artisan test || true
+        run: php artisan test
+        
+      # - name: Run tests (ignore failures)
+      #   working-directory: src
+      #   run: php artisan test || true

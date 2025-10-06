@@ -79,6 +79,22 @@ services:
       - blog-network
     restart: unless-stopped
 
+  vite:
+    image: node:18-slim
+    container_name: blog-vite
+    working_dir: /var/www/html
+    volumes:
+      - ./src:/var/www/html
+    command: sh -c "npm install && npm run dev"
+    ports:
+      - "5173:5173"
+    depends_on:
+      - app
+    networks:
+      - blog-network
+    restart: unless-stopped
+
+
 networks:
   blog-network:
 
