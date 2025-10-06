@@ -23,11 +23,31 @@ class FortifyServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        $this->configureRateLimiting();
+
+        // $this->loadRoutesFrom(base_path('routes/auth.php'));
+        $this->loadRoutesFrom(base_path('routes/web.php'));
+
+        
         Fortify::twoFactorChallengeView(fn () => view('livewire.auth.two-factor-challenge'));
         Fortify::confirmPasswordView(fn () => view('livewire.auth.confirm-password'));
 
         RateLimiter::for('two-factor', function (Request $request) {
             return Limit::perMinute(5)->by($request->session()->get('login.id'));
+        });
+    }
+
+    /**
+     * Configure the rate limiters for the application.
+     */
+    protected function configureRateLimiting(): void
+    {
+        RateLimiter::for('login', function (Request $request) {
+            return Limit::perMinute(5)->by($request->email . $request->ip());
+        });
+
+        RateLimiter::for('api', function (Request $request) {
+            return Limit::perMinute(60)->by(optional($request->user())->id ?: $request->ip());
         });
     }
 }

@@ -23,6 +23,23 @@ Route::middleware('auth')->group(function () {
     Route::get('verify-email/{id}/{hash}', VerifyEmailController::class)
         ->middleware(['signed', 'throttle:6,1'])
         ->name('verification.verify');
+
+    Route::post('register', Register::class)
+        ->name('register');
+
+    // Route::post('login', function () {
+        
+    //     Login::login([
+    //         'email' => request('email|string|email'),
+    //         'password' => request('password|string'),
+    //         'remember' => request()->has('remember|boolean'),
+    //     ]);
+    //     return redirect()->intended(route('dashboard'));
+    //     // return redirect()->route('dashboard');
+    // });
+
+    // Route::post('register', [Register::class,
+    //     'register']);
 });
 
 Route::post('logout', Logout::class)
