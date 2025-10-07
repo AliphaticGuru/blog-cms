@@ -48,11 +48,33 @@ jobs:
 
       - name: Run migrations
         working-directory: src
+        env:
+          DB_CONNECTION: pgsql
+          DB_HOST: db
+          DB_PORT: 5432
+          DB_DATABASE: blog_cms
+          DB_USERNAME: laraveluser
+          DB_PASSWORD: secret
         run: php artisan migrate
 
       - name: Run tests (if failures occur, check the database service logs for details)
         working-directory: src
+        env:
+          DB_CONNECTION: pgsql
+          DB_HOST: db
+          DB_PORT: 5432
+          DB_DATABASE: blog_cms
+          DB_USERNAME: laraveluser
+          DB_PASSWORD: secret
         run: php artisan test
+
+      # - name: Run migrations
+      #   working-directory: src
+      #   run: php artisan migrate
+
+      # - name: Run tests (if failures occur, check the database service logs for details)
+      #   working-directory: src
+      #   run: php artisan test
         
       # - name: Run tests (ignore failures)
       #   working-directory: src
