@@ -14,12 +14,12 @@ jobs:
       postgres:
         image: postgres:16
         env:
-          POSTGRES_USER: laravel
+          POSTGRES_USER: laraveluser
           POSTGRES_PASSWORD: secret
           POSTGRES_DB: blog_cms
         ports: ["5432:5432"]
         options: >-
-          --health-cmd="pg_isready -U laravel -d blog_cms"
+          --health-cmd="pg_isready -U laraveluser -d blog_cms"
           --health-interval=10s
           --health-timeout=5s
           --health-retries=5
@@ -46,6 +46,19 @@ jobs:
         working-directory: src
         run: php artisan key:generate
 
+      - name: Wait for PostgreSQL to be ready
+        run: |
+          for i in {1..10}; do
+            nc -z localhost 5432 && echo "Postgres is up!" && break
+            echo "Waiting for Postgres..."; sleep 3;
+          done
+
+      # - name: Create custom DB user
+      #   run: |
+      #     PGPASSWORD=postgres psql -h 127.0.0.1 -U postgres -d laravel_test -c "CREATE USER laraveluser WITH PASSWORD 'secret';"
+      #     PGPASSWORD=postgres psql -h 127.0.0.1 -U postgres -d laravel_test -c "GRANT ALL PRIVILEGES ON DATABASE laravel_test TO laraveluser;"
+
+
       - name: Run migrations
         working-directory: src
         env:
@@ -55,7 +68,7 @@ jobs:
           DB_DATABASE: blog_cms
           DB_USERNAME: laraveluser
           DB_PASSWORD: secret
-        run: php artisan migrate
+        run: php artisan migrate --force
 
       - name: Run tests (if failures occur, check the database service logs for details)
         working-directory: src
