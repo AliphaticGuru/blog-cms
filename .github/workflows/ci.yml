@@ -50,7 +50,7 @@ jobs:
         working-directory: src
         env:
           DB_CONNECTION: pgsql
-          DB_HOST: db
+          DB_HOST: localhost
           DB_PORT: 5432
           DB_DATABASE: blog_cms
           DB_USERNAME: laraveluser
@@ -61,7 +61,7 @@ jobs:
         working-directory: src
         env:
           DB_CONNECTION: pgsql
-          DB_HOST: db
+          DB_HOST: localhost
           DB_PORT: 5432
           DB_DATABASE: blog_cms
           DB_USERNAME: laraveluser
