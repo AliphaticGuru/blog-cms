@@ -38,7 +38,8 @@ RUN apk add \
     bash curl unzip zip icu-dev libpng-dev oniguruma-dev libjpeg-turbo-dev libwebp-dev freetype-dev postgresql-dev build-base \
  && docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
  && docker-php-ext-install -j$(nproc) pdo_pgsql mbstring intl gd \
- && apk del build-base
+ && apk del build-base \
+ && rm -rf /var/cache/apk/*
 
 # RUN apk add --no-cache \
 #     curl unzip zip bash icu-dev libpng-dev oniguruma-dev \
