@@ -73,7 +73,7 @@ jobs:
 
       - name: Run migrations
         working-directory: src
-        run: php artisan migrate --force
+        run: php artisan migrate
         # run: php artisan migrate --force
 
       - name: Run tests (if failures occur, check the database service logs for details)
