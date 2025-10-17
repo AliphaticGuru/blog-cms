@@ -34,16 +34,25 @@ USER root
 
 # Install PHP extensions natively on Alpine (don’t copy from Debian!)
 
-RUN apk add --no-cache \
-    bash curl unzip zip icu-dev libpng-dev oniguruma-dev libjpeg-turbo-dev libwebp-dev freetype-dev postgresql-dev build-base \
- && docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
- && docker-php-ext-install -j$(nproc) pdo_pgsql mbstring intl gd \
- && apk del build-base \
- && rm -rf /var/cache/apk/*
-
 # RUN apk add --no-cache \
-#     curl unzip zip bash icu-dev libpng-dev oniguruma-dev \
-#  && docker-php-ext-install pdo_pgsql mbstring intl gd
+#     bash curl unzip zip icu-dev libpng-dev oniguruma-dev libjpeg-turbo-dev libwebp-dev freetype-dev postgresql-dev build-base \
+#  && docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
+#  && docker-php-ext-install -j$(nproc) pdo_pgsql mbstring intl gd \
+#  && apk del build-base \
+#  && rm -rf /var/cache/apk/*
+
+
+
+ RUN apk add --no-cache --virtual .build-deps \
+      build-base icu-dev libpng-dev oniguruma-dev \
+      libjpeg-turbo-dev libwebp-dev freetype-dev postgresql-dev \
+  && docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
+  && docker-php-ext-install -j$(nproc) pdo_pgsql mbstring intl gd \
+  && apk del .build-deps \
+  && apk add --no-cache bash curl unzip zip \
+  && rm -rf /var/cache/apk/* /tmp/*
+ 
+ 
 
 COPY --from=builder /usr/bin/composer /usr/bin/composer
 
