@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
 
     services:
-      postgres:
+      db:
         image: postgres:16
         env:
           POSTGRES_USER: laraveluser
@@ -46,6 +46,14 @@ jobs:
         working-directory: src
         run: php artisan key:generate
 
+        # Load .env values automatically for all following steps
+      - name: Export environment variables
+        working-directory: src
+        run: |
+          set -a
+          source .env
+          set +a
+
       - name: Wait for PostgreSQL to be ready
         run: |
           for i in {1..10}; do
@@ -53,42 +61,39 @@ jobs:
             echo "Waiting for Postgres..."; sleep 3;
           done
 
-      # - name: Create custom DB user
-      #   run: |
-      #     PGPASSWORD=postgres psql -h 127.0.0.1 -U postgres -d laravel_test -c "CREATE USER laraveluser WITH PASSWORD 'secret';"
-      #     PGPASSWORD=postgres psql -h 127.0.0.1 -U postgres -d laravel_test -c "GRANT ALL PRIVILEGES ON DATABASE laravel_test TO laraveluser;"
-
-
       - name: Run migrations
         working-directory: src
-        env:
-          DB_CONNECTION: pgsql
-          DB_HOST: localhost
-          DB_PORT: 5432
-          DB_DATABASE: blog_cms
-          DB_USERNAME: laraveluser
-          DB_PASSWORD: secret
         run: php artisan migrate --force
+        # run: php artisan migrate --force
 
       - name: Run tests (if failures occur, check the database service logs for details)
         working-directory: src
-        env:
-          DB_CONNECTION: pgsql
-          DB_HOST: localhost
-          DB_PORT: 5432
-          DB_DATABASE: blog_cms
-          DB_USERNAME: laraveluser
-          DB_PASSWORD: secret
         run: php artisan test
 
-      # - name: Run migrations
-      #   working-directory: src
-      #   run: php artisan migrate
 
-      # - name: Run tests (if failures occur, check the database service logs for details)
-      #   working-directory: src
-      #   run: php artisan test
-        
-      # - name: Run tests (ignore failures)
-      #   working-directory: src
-      #   run: php artisan test || true
+
+
+
+# - name: Copy env file
+#   working-directory: src
+#   run: cp .env.example .env
+
+# - name: Generate app key
+#   working-directory: src
+#   run: php artisan key:generate
+
+# # Load .env values automatically for all following steps
+# - name: Export environment variables
+#   working-directory: src
+#   run: |
+#     set -a
+#     source .env
+#     set +a
+
+# - name: Run migrations
+#   working-directory: src
+#   run: php artisan migrate
+
+# - name: Run tests
+#   working-directory: src
+#   run: php artisan test

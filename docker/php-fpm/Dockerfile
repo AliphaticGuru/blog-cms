@@ -34,7 +34,7 @@ USER root
 
 # Install PHP extensions natively on Alpine (don’t copy from Debian!)
 
-RUN apk add \
+RUN apk add --no-cache \
     bash curl unzip zip icu-dev libpng-dev oniguruma-dev libjpeg-turbo-dev libwebp-dev freetype-dev postgresql-dev build-base \
  && docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
  && docker-php-ext-install -j$(nproc) pdo_pgsql mbstring intl gd \
@@ -46,11 +46,6 @@ RUN apk add \
 #  && docker-php-ext-install pdo_pgsql mbstring intl gd
 
 COPY --from=builder /usr/bin/composer /usr/bin/composer
-
-# Install runtime deps
-# RUN apk add --no-cache curl unzip zip bash \
-#  && install-php-extensions \
-#     pdo_pgsql mbstring zip intl gd
 
 # PHP configs
 COPY 99-custom.ini /usr/local/etc/php/conf.d/
