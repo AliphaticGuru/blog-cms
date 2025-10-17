@@ -24,6 +24,17 @@ jobs:
           --health-timeout=5s
           --health-retries=5
 
+    env:  # 👈 This makes .env values globally available
+      DB_CONNECTION: pgsql
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_DATABASE: blog_cms
+      DB_USERNAME: laraveluser
+      DB_PASSWORD: secret
+      APP_ENV: testing
+      APP_KEY: base64:ENl2ADxl0mKmMokW4iJU69MGhbDIuWgBLadMlh7282w=
+
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -47,12 +58,12 @@ jobs:
         run: php artisan key:generate
 
         # Load .env values automatically for all following steps
-      - name: Export environment variables
-        working-directory: src
-        run: |
-          set -a
-          source .env
-          set +a
+      # - name: Export environment variables
+      #   working-directory: src
+      #   run: |
+      #     set -a
+      #     source .env
+      #     set +a
 
       - name: Wait for PostgreSQL to be ready
         run: |
