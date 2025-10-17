@@ -26,13 +26,12 @@ jobs:
 
     env:  # 👈 This makes .env values globally available
       DB_CONNECTION: pgsql
-      DB_HOST: db
+      DB_HOST: 127.0.0.1
       DB_PORT: 5432
       DB_DATABASE: blog_cms
       DB_USERNAME: laraveluser
       DB_PASSWORD: secret
       APP_ENV: testing
-      APP_KEY: base64:ENl2ADxl0mKmMokW4iJU69MGhbDIuWgBLadMlh7282w=
 
 
     steps:
