@@ -1,0 +1,17 @@
+# docker/php-fpm/Dockerfile
+FROM php:8.4-fpm-alpine
+
+WORKDIR /var/www/html
+
+# install deps and extensions (as before)
+RUN apk add --no-cache icu-dev libpng-dev postgresql-dev libjpeg-turbo-dev libwebp-dev freetype-dev \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
+    && docker-php-ext-install pdo_pgsql gd intl
+
+# copy app files
+COPY ./src /var/www/html
+
+# set proper permissions
+RUN chown -R www-data:www-data /var/www/html
+
+USER www-data

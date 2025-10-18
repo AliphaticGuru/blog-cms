@@ -22,51 +22,96 @@ COPY --from=composer:2.8.12 /usr/bin/composer /usr/bin/composer
 WORKDIR /var/www/html
 
 
-# ---------------------
-# Stage 2: Runtime (Alpine)
-# ---------------------
-FROM php:8.4-fpm-alpine AS runtime
-
-USER root
-
-# Copy tools from builder
-# COPY --from=builder /usr/local/bin/install-php-extensions /usr/local/bin/
-
-# Install PHP extensions natively on Alpine (don’t copy from Debian!)
-
-# RUN apk add --no-cache \
-#     bash curl unzip zip icu-dev libpng-dev oniguruma-dev libjpeg-turbo-dev libwebp-dev freetype-dev postgresql-dev build-base \
-#  && docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
-#  && docker-php-ext-install -j$(nproc) pdo_pgsql mbstring intl gd \
-#  && apk del build-base \
-#  && rm -rf /var/cache/apk/*
 
 
 
- RUN apk add --no-cache --virtual .build-deps \
-      build-base icu-dev libpng-dev oniguruma-dev \
-      libjpeg-turbo-dev libwebp-dev freetype-dev postgresql-dev \
-  && docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
-  && docker-php-ext-install -j$(nproc) pdo_pgsql mbstring intl gd \
-  && apk del .build-deps \
-  && apk add --no-cache bash curl unzip zip \
-  && rm -rf /var/cache/apk/* /tmp/*
- 
- 
+# Stage 2: Runtime
+FROM php:8.4.8-fpm-alpine AS laravel-runtime
 
-COPY --from=builder /usr/bin/composer /usr/bin/composer
-
-# PHP configs
+# Install runtime dependencies and PHP extensions
+RUN set -eux; \
+    apk add --no-cache \
+        bash curl unzip zip \
+        libzip libpng libjpeg-turbo libwebp freetype \
+        icu libxml2 oniguruma libpq \
+    && apk add --no-cache --virtual .build-deps \
+        build-base \
+        libzip-dev libpng-dev libjpeg-turbo-dev libwebp-dev freetype-dev \
+        icu-dev libxml2-dev oniguruma-dev postgresql-dev \
+    && docker-php-ext-configure zip \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
+    && docker-php-ext-install -j"$(nproc)" pdo_pgsql mbstring intl gd \
+    && apk del .build-deps \
+    && rm -rf /var/cache/apk/* /tmp/*
+    
+# Copy PHP configuration
 COPY 99-custom.ini /usr/local/etc/php/conf.d/
 COPY zz-dynamic.conf /usr/local/etc/php-fpm.d/
 
+# Copy Composer from builder
+COPY --from=builder /usr/bin/composer /usr/bin/composer
+
+# Set working directory
 WORKDIR /var/www/html
 
-# Permissions
+# Ensure proper permissions
 RUN chown -R www-data:www-data /var/www/html
+
 USER www-data
 
 CMD ["php-fpm"]
+
+
+
+
+
+
+
+# # ---------------------
+# # Stage 2: Runtime (Alpine)
+# # ---------------------
+# FROM php:8.4-fpm-alpine AS runtime
+
+# USER root
+
+# # Copy tools from builder
+# # COPY --from=builder /usr/local/bin/install-php-extensions /usr/local/bin/
+
+# # Install PHP extensions natively on Alpine (don’t copy from Debian!)
+
+# # RUN apk add --no-cache \
+# #     bash curl unzip zip icu-dev libpng-dev oniguruma-dev libjpeg-turbo-dev libwebp-dev freetype-dev postgresql-dev build-base \
+# #  && docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
+# #  && docker-php-ext-install -j$(nproc) pdo_pgsql mbstring intl gd \
+# #  && apk del build-base \
+# #  && rm -rf /var/cache/apk/*
+
+
+
+#  RUN apk add --no-cache --virtual .build-deps \
+#       build-base icu-dev libpng-dev oniguruma-dev \
+#       libjpeg-turbo-dev libwebp-dev freetype-dev postgresql-dev \
+#   && docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
+#   && docker-php-ext-install -j$(nproc) pdo_pgsql mbstring intl gd \
+#   && apk del .build-deps \
+#   && apk add --no-cache bash curl unzip zip \
+#   && rm -rf /var/cache/apk/* /tmp/*
+ 
+ 
+
+# COPY --from=builder /usr/bin/composer /usr/bin/composer
+
+# # PHP configs
+# COPY 99-custom.ini /usr/local/etc/php/conf.d/
+# COPY zz-dynamic.conf /usr/local/etc/php-fpm.d/
+
+# WORKDIR /var/www/html
+
+# # Permissions
+# RUN chown -R www-data:www-data /var/www/html
+# USER www-data
+
+# CMD ["php-fpm"]
 
 
 
